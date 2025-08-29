@@ -1508,4 +1508,4 @@ if __name__ == "__main__":
     print("// END  Generated code -- do not edit")
 
     for f in ["x86ops.s", "x86ops.o", "x86ops.bin"]:
-        os.remove(f)
+        os.remove(f)        
