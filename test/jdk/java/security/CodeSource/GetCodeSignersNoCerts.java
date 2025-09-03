@@ -21,10 +21,10 @@
  * questions.
  */
 
-import java.io.File;
 import java.net.URL;
-import java.security.*;
-import java.security.cert.*;
+import java.net.URI;
+import java.security.CodeSource;
+import java.security.PublicKey;
 import java.security.cert.Certificate;
 
 /**
