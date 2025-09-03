@@ -61,8 +61,7 @@ public class GetCodeSignersNoCerts {
     };
 
     public static void main(String[] args) throws Exception {
-        File certsFile = new File(System.getProperty("test.src", "."), "certs");
-        URL location = certsFile.toURI().toURL();
+        URL location = URI.create("file:///ignored").toURL();
 
         CodeSource cs = new CodeSource(location, new Certificate[0]);
         cs.getCodeSigners();
