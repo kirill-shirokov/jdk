@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -21,17 +21,19 @@
  * questions.
  */
 
-/*
- * @test
- * @bug 8366522
- * @summary Verify that NPE is not thrown CodeSource.getCodeSigners() when CodeSource is created with empty or null certs argument
- */
 import java.io.File;
 import java.net.URL;
 import java.security.*;
 import java.security.cert.*;
 import java.security.cert.Certificate;
 
+/**
+ * @test
+ * @bug 8366522
+ * @summary Verify that NPE is not thrown CodeSource.getCodeSigners() when
+ *          CodeSource is created with empty or null certs argument, or
+ *          there are no X509 certificates in certs
+ */
 public class GetCodeSignersNoCerts {
     private static final Certificate NON_X509_CERT = new Certificate("") {
         @Override
@@ -62,9 +64,7 @@ public class GetCodeSignersNoCerts {
         File certsFile = new File(System.getProperty("test.src", "."), "certs");
         URL location = certsFile.toURI().toURL();
 
-        // CodeSource.getCodeSigners must not throw a NPE when there are no X509 certificates in the chain
-
-        CodeSource cs = new CodeSource(location, new java.security.cert.Certificate[0]);
+        CodeSource cs = new CodeSource(location, new Certificate[0]);
         cs.getCodeSigners();
 
         cs = new CodeSource(location, (java.security.cert.Certificate[]) null);
@@ -74,4 +74,3 @@ public class GetCodeSignersNoCerts {
         cs.getCodeSigners();
     }
 }
-
