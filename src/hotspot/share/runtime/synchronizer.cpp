@@ -430,7 +430,7 @@ void ObjectSynchronizer::handle_sync_on_value_based_class(Handle obj, JavaThread
 void ObjectSynchronizer::jni_enter(Handle obj, JavaThread* current) {
   // Top native frames in the stack will not be seen if we attempt
   // preemption, since we start walking from the last Java anchor.
-  NoPreemptMark npm(current);
+  NoPreemptMark npm(current, __FILE__, __LINE__);
 
   if (obj->klass()->is_value_based()) {
     handle_sync_on_value_based_class(obj, current);
@@ -467,8 +467,8 @@ void ObjectSynchronizer::jni_exit(oop obj, TRAPS) {
 // -----------------------------------------------------------------------------
 // Internal VM locks on java objects
 // standard constructor, allows locking failures
-ObjectLocker::ObjectLocker(Handle obj, TRAPS) : _thread(THREAD), _obj(obj),
-  _npm(_thread, _thread->at_preemptable_init() /* ignore_mark */), _skip_exit(false) {
+ObjectLocker::ObjectLocker(Handle obj, const char * const file, int line, TRAPS) : _thread(THREAD), _obj(obj),
+  _npm(_thread, file, line, _thread->at_preemptable_init() /* ignore_mark */), _skip_exit(false) {
   assert(!_thread->preempting(), "");
 
   _thread->check_for_valid_safepoint_state();

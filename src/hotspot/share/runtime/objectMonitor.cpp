@@ -1956,7 +1956,7 @@ void ObjectMonitor::wait(jlong millis, bool interruptible, TRAPS) {
       // We use the NoPreemptMark for the very rare case where the previous
       // preempt attempt failed due to OOM. The preempt on monitor contention
       // could succeed but we can't unmount now.
-      NoPreemptMark npm(current);
+      NoPreemptMark npm(current, __FILE__, __LINE__);
       enter(current);
     } else {
       // This means the thread has been un-parked and added to the entry_list

@@ -1293,11 +1293,51 @@ final class VirtualThread extends BaseVirtualThread {
     }
 
     private void setState(int newValue) {
+        int oldValue = state;
         state = newValue;  // volatile write
+        System.err.println("[VT-#" + threadId() + "] setState: " + stateToString(oldValue) + " -> " + stateToString(newValue) + " @ " + getStackTraceString());
     }
 
     private boolean compareAndSetState(int expectedValue, int newValue) {
-        return U.compareAndSetInt(this, STATE, expectedValue, newValue);
+        boolean result = U.compareAndSetInt(this, STATE, expectedValue, newValue);
+        if (result) {
+            System.err.println("[VT-#" + threadId() + "] CAS: " + stateToString(expectedValue) + " -> " + stateToString(newValue) + " @ " + getStackTraceString());
+        }
+        return result;
+    }
+
+    private String stateToString(int s) {
+        return switch (s) {
+            case NEW -> "NEW";
+            case STARTED -> "STARTED";
+            case RUNNING -> "RUNNING";
+            case PARKING -> "PARKING";
+            case PARKED -> "PARKED";
+            case PINNED -> "PINNED";
+            case TIMED_PARKING -> "TIMED_PARKING";
+            case TIMED_PARKED -> "TIMED_PARKED";
+            case TIMED_PINNED -> "TIMED_PINNED";
+            case BLOCKING -> "BLOCKING";
+            case BLOCKED -> "BLOCKED";
+            case WAITING -> "WAITING";
+            case WAIT -> "WAIT";
+            case TIMED_WAITING -> "TIMED_WAITING";
+            case TIMED_WAIT -> "TIMED_WAIT";
+            case UNPARKED -> "UNPARKED";
+            case UNBLOCKED -> "UNBLOCKED";
+            case YIELDING -> "YIELDING";
+            case YIELDED -> "YIELDED";
+            case TERMINATED -> "TERMINATED";
+            default -> "UNKNOWN(" + s + ")";
+        };
+    }
+
+    private String getStackTraceString() {
+        StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+        if (stack.length > 3) {
+            return stack[3].getClassName() + "." + stack[3].getMethodName() + ":" + stack[3].getLineNumber();
+        }
+        return "unknown";
     }
 
     private boolean compareAndSetOnWaitingList(boolean expectedValue, boolean newValue) {

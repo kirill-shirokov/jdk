@@ -136,11 +136,20 @@ freeze_result Continuation::try_preempt(JavaThread* current, oop continuation) {
     return freeze_pinned_native;
   }
 
+  ContinuationEntry* entry = current->last_continuation();
+
   UnmountBeginMark ubm(current);
   if (ubm.failed()) return freeze_pinned_native;
   freeze_result res = CAST_TO_FN_PTR(FreezeContFnT, freeze_preempt_entry())(current, current->last_Java_sp());
   log_trace(continuations, preempt)("try_preempt: %d", res);
   ubm.set_result(res);
+
+  if (PrintCompilation) {
+    ResourceMark rm;
+    tty->print_cr("%s <%lld>: try_preempt: %d, is_pinned=%s", current->name(),
+      (int64_t) java_lang_Thread::thread_id(current->threadObj()),
+      res, entry->is_pinned() ? "YES" : "no");
+  }
 
   if (current->has_pending_exception()) {
     assert(res == freeze_exception, "expecting an exception result from freeze");
@@ -371,6 +380,10 @@ bool Continuation::pin(JavaThread* current) {
   if (ce == nullptr) {
     return true; // no continuation mounted
   }
+  if (PrintCompilation) {
+    ResourceMark rm;
+    tty->print_cr("%s continuation pin++", current->name());
+  }
   return ce->pin();
 }
 
@@ -378,6 +391,10 @@ bool Continuation::unpin(JavaThread* current) {
   ContinuationEntry* ce = current->last_continuation();
   if (ce == nullptr) {
     return true; // no continuation mounted
+  }
+  if (PrintCompilation) {
+    ResourceMark rm;
+    tty->print_cr("%s continuation pin--", current->name());
   }
   return ce->unpin();
 }

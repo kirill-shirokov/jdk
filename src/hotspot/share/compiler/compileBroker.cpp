@@ -1380,6 +1380,12 @@ nmethod* CompileBroker::compile_method(const methodHandle& method, int osr_bci,
   }
 #endif
 
+  // if (PrintCompilation) {
+  //   ResourceMark rm;
+  //   tty->print_cr("CompileBroker::compile_method(%s, osr_bci=%d, comp_level=%d, hot_count=%d, reason=%s)",
+  //     method->name_and_sig_as_C_string(), osr_bci, comp_level, hot_count, CompileTask::reason_name(compile_reason));
+  // }
+
   DirectiveSet* directive = DirectivesStack::getMatchingDirective(method, comp_level);
   // CompileBroker::compile_method can trap and can have pending async exception.
   nmethod* nm = CompileBroker::compile_method(method, osr_bci, comp_level, hot_count, compile_reason, directive, THREAD);
@@ -1400,6 +1406,12 @@ nmethod* CompileBroker::compile_method(const methodHandle& method, int osr_bci,
   assert(!method->is_abstract() && (osr_bci == InvocationEntryBci || !method->is_native()), "cannot compile abstract/native methods");
   assert(!method->method_holder()->is_not_initialized(), "method holder must be initialized");
   // return quickly if possible
+
+  if (PrintCompilation) {
+    ResourceMark rm;
+    tty->print_cr("CompileBroker::compile_method(%s, osr_bci=%d, comp_level=%d, hot_count=%d, reason=%s)",
+      method->name_and_sig_as_C_string(), osr_bci, comp_level, hot_count, CompileTask::reason_name(compile_reason));
+  }
 
   // lock, make sure that the compilation
   // isn't prohibited in a straightforward way.

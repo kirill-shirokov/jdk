@@ -595,7 +595,7 @@ InstanceKlass* SystemDictionary::resolve_instance_class_or_null(Symbol* name,
   // ParallelCapable class loaders and the bootstrap classloader
   // do not acquire lock here.
   Handle lockObject = get_loader_lock_or_null(class_loader);
-  ObjectLocker ol(lockObject, THREAD);
+  ObjectLocker ol(lockObject, __FILE__, __LINE__, THREAD);
 
   bool circularity_detection_in_progress  = false;
   InstanceKlass* loaded_class = nullptr;
@@ -845,7 +845,7 @@ InstanceKlass* SystemDictionary::resolve_class_from_stream(
   // Classloaders that support parallelism, e.g. bootstrap classloader,
   // do not acquire lock here
   Handle lockObject = get_loader_lock_or_null(class_loader);
-  ObjectLocker ol(lockObject, THREAD);
+  ObjectLocker ol(lockObject, __FILE__, __LINE__, THREAD);
 
   // Parse the stream and create a klass.
   // Note that we do this even though this klass might
@@ -1119,7 +1119,7 @@ InstanceKlass* SystemDictionary::load_shared_class(InstanceKlass* ik,
   {
     HandleMark hm(THREAD);
     Handle lockObject = get_loader_lock_or_null(class_loader);
-    ObjectLocker ol(lockObject, THREAD);
+    ObjectLocker ol(lockObject, __FILE__, __LINE__, THREAD);
     // prohibited package check assumes all classes loaded from archive call
     // restore_unshareable_info which calls ik->set_package()
     ik->restore_unshareable_info(loader_data, protection_domain, pkg_entry, CHECK_NULL);

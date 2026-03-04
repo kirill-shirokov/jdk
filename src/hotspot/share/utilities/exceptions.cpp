@@ -347,7 +347,7 @@ Handle Exceptions::new_exception(JavaThread* thread, Symbol* name,
     // from a preemptable call. Don't preempt here since before
     // the PreemptedException is propagated we might make an upcall
     // to Java to initialize the object with the cause of exception.
-    NoPreemptMark npm(thread);
+    NoPreemptMark npm(thread, __FILE__, __LINE__);
     h_exception = JavaCalls::construct_new_instance(InstanceKlass::cast(klass),
                                 signature,
                                 args,

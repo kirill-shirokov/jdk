@@ -264,7 +264,7 @@ class ObjectLocker : public StackObj {
   NoPreemptMark _npm;
   bool    _skip_exit;
  public:
-  ObjectLocker(Handle obj, TRAPS);
+  ObjectLocker(Handle obj, const char * const file, int line, TRAPS);
   ~ObjectLocker();
 
   // Monitor behavior

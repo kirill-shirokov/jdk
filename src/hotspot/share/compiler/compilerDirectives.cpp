@@ -799,7 +799,15 @@ DirectiveSet* DirectivesStack::getMatchingDirective(const methodHandle& method, 
   }
   guarantee(match != nullptr, "There should always be a default directive that matches");
 
+  // if (PrintCompilation2) {
+  //   ResourceMark rm;
+  //   tty->print_cr("DirectivesStack::getMatchingDirective(%s, %s): compilecommand_compatibility_init()",
+  //     method->name_and_sig_as_C_string(), comp != nullptr ? comp->name() : "<null>");
+  // }
   // Check for legacy compile commands update, without DirectivesStack_lock
   DirectiveSet* result = match->compilecommand_compatibility_init(method, comp_level);
+  // if (PrintCompilation2) {
+  //   result->print(tty);
+  // }
   return result;
 }

@@ -1381,13 +1381,14 @@ class JNIHandleMark : public StackObj {
 };
 
 class NoPreemptMark {
+  JavaThread* _thread;
   ContinuationEntry* _ce;
   bool _unpin;
+  const char * const _file;
+  int _line;
  public:
-  NoPreemptMark(JavaThread* thread, bool ignore_mark = false) : _ce(thread->last_continuation()), _unpin(false) {
-    if (_ce != nullptr && !ignore_mark) _unpin = _ce->pin();
-  }
-  ~NoPreemptMark() { if (_unpin) _ce->unpin(); }
+  NoPreemptMark(JavaThread* thread, const char * const file, int line, bool ignore_mark = false);
+  ~NoPreemptMark();
 };
 
 class ThreadOnMonitorWaitedEvent {

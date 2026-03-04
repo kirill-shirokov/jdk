@@ -1116,6 +1116,11 @@ void LinkResolver::resolve_static_call(CallInfo& result,
 
   // Initialize klass (this should only happen if everything is ok)
   if (init_mode != ClassInitMode::dont_init && resolved_klass->should_be_initialized()) {
+    if (PrintCompilation) {
+      ResourceMark rm(THREAD);
+      tty->print_cr("%s: resolve_static_call: About to initialize klass %s in %s mode", __the_thread__->name(), resolved_klass->external_name(),
+        init_mode == ClassInitMode::init ? "init" : init_mode == ClassInitMode::dont_init ? "dont_init " : "init_preemptable");
+    }
     if (init_mode == ClassInitMode::init) {
       resolved_klass->initialize(CHECK);
     } else if (init_mode == ClassInitMode::init_preemptable) {

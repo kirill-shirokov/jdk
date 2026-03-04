@@ -822,6 +822,10 @@ class PreemptableInitCall {
   PreemptableInitCall(JavaThread* thread, InstanceKlass* ik) : _thread(thread) {
     _previous = thread->at_preemptable_init();
     _thread->set_at_preemptable_init(true);
+    if (PrintCompilation2) {
+      ResourceMark rm;
+      tty->print_cr("%s: thread->set_at_preemptable_init: %s", thread->name(), ik->external_name());
+    }
     DEBUG_ONLY(_previous_klass = _thread->preempt_init_klass();)
     DEBUG_ONLY(_thread->set_preempt_init_klass(ik));
   }
@@ -831,7 +835,23 @@ class PreemptableInitCall {
   }
 };
 
+static void print_stack(TRAPS) {
+  stringStream out;
+  static char buf[O_BUFLEN];
+  address lastpc = nullptr;
+  NativeStackPrinter nsp(THREAD, nullptr, __FILE_NAME__, __LINE__);
+  nsp.print_stack(&out, buf, sizeof(buf), lastpc,true,  -1);
+  tty->print_cr("STACK TRACE:\n%s", out.as_string());
+}
+
 void InstanceKlass::initialize_preemptable(TRAPS) {
+  if (PrintCompilation2) {
+    ResourceMark rm;
+    tty->print_cr("%s: should %s be initialized preemptable? %s", __the_thread__->name(), external_name(), should_be_initialized() ? "YES" : "no");
+    if (strstr(external_name(), "TestClass") != nullptr) {
+      print_stack(THREAD);
+    }
+  }
   if (this->should_be_initialized()) {
     PreemptableInitCall pic(THREAD, this);
     initialize_impl(THREAD);
@@ -844,6 +864,13 @@ void InstanceKlass::initialize_preemptable(TRAPS) {
 // process. The step comments refers to the procedure described in that section.
 // Note: implementation moved to static method to expose the this pointer.
 void InstanceKlass::initialize(TRAPS) {
+  if (PrintCompilation2) {
+    ResourceMark rm;
+    tty->print_cr("%s: should %s be initialized (NOT preemptable)? %s", __the_thread__->name(), external_name(), should_be_initialized() ? "YES" : "no");
+    if (strstr(external_name(), "TestClass") != nullptr) {
+      print_stack(THREAD);
+    }
+  }
   if (this->should_be_initialized()) {
     initialize_impl(CHECK);
     // Note: at this point the class may be initialized
@@ -910,7 +937,7 @@ void InstanceKlass::initialize_with_aot_initialized_mirror(TRAPS) {
 #ifdef ASSERT
   {
     Handle h_init_lock(THREAD, init_lock());
-    ObjectLocker ol(h_init_lock, THREAD);
+    ObjectLocker ol(h_init_lock, __FILE__, __LINE__, THREAD);
     assert(!is_initialized(), "sanity");
     assert(!is_being_initialized(), "sanity");
     assert(!is_in_error_state(), "sanity");
@@ -1015,11 +1042,11 @@ bool InstanceKlass::link_class_impl(TRAPS) {
   {
     HandleMark hm(THREAD);
     Handle h_init_lock(THREAD, init_lock());
-    ObjectLocker ol(h_init_lock, CHECK_PREEMPTABLE_false);
+    ObjectLocker ol(h_init_lock, __FILE__, __LINE__, CHECK_PREEMPTABLE_false);
     // Don't allow preemption if we link/initialize classes below,
     // since that would release this monitor while we are in the
     // middle of linking this class.
-    NoPreemptMark npm(THREAD);
+    NoPreemptMark npm(THREAD, __FILE__, __LINE__);
 
     // rewritten will have been set if loader constraint error found
     // on an earlier link attempt
@@ -1219,8 +1246,25 @@ class ThreadWaitingForClassInit : public StackObj {
  public:
   ThreadWaitingForClassInit(JavaThread* thread, InstanceKlass* ik) : _thread(thread) {
     _thread->set_class_to_be_initialized(ik);
+    if (PrintCompilation) {
+      ResourceMark rm;
+      tty->print("%llu: Thread \"%s\" <%lld>", (uint64_t) tty->time_stamp().milliseconds(), _thread->name(),
+        java_lang_Thread::thread_id(_thread->threadObj()));
+      if (_thread->is_vthread_mounted()) {
+        tty->print(" (vthread: #%lld)", java_lang_Thread::thread_id(_thread->vthread()));
+      }
+      tty->print_cr(" ThreadWaitingForClassInit: start: %s", _thread->class_to_be_initialized()->external_name());
+    }
   }
   ~ThreadWaitingForClassInit() {
+    if (PrintCompilation){
+      ResourceMark rm;
+      tty->print("%llu: Thread \"%s\"", (uint64_t) tty->time_stamp().milliseconds(), _thread->name());
+      if (_thread->is_vthread_mounted()) {
+        tty->print(" (vthread: #%lld)", java_lang_Thread::thread_id(_thread->vthread()));
+      }
+      tty->print_cr(" ThreadWaitingForClassInit: STOP: %s",_thread->class_to_be_initialized()->external_name());
+    }
     _thread->set_class_to_be_initialized(nullptr);
   }
 };
@@ -1244,7 +1288,17 @@ void InstanceKlass::initialize_impl(TRAPS) {
   // Step 1
   {
     Handle h_init_lock(THREAD, init_lock());
-    ObjectLocker ol(h_init_lock, CHECK_PREEMPTABLE);
+    ObjectLocker ol(h_init_lock, __FILE__, __LINE__, CHECK_PREEMPTABLE);
+
+    if (PrintCompilation) {
+      ResourceMark rm(jt);
+      tty->print("%llu: Thread \"%s\"", (uint64_t) tty->time_stamp().milliseconds(), jt->name());
+      if (jt->is_vthread_mounted()) {
+        tty->print(" (vthread: #%lld)", java_lang_Thread::thread_id(jt->vthread()));
+      }
+      tty->print_cr(" (preempting=%s) waiting for initialization of %s",
+          jt->preempting() ? "YES" : "no", external_name());
+    }
 
     // Step 2
     // If we were to use wait() instead of waitInterruptibly() then
@@ -1257,8 +1311,45 @@ void InstanceKlass::initialize_impl(TRAPS) {
                                jt->name(), external_name(), init_thread_name());
       }
       wait = true;
+
+  if (PrintCompilation) {
+      ResourceMark rm(jt);
+      tty->print("%llu: Thread \"%s\"", (uint64_t) tty->time_stamp().milliseconds(), jt->name());
+      if (jt->is_vthread_mounted()) {
+        tty->print(" (vthread: #%lld)", java_lang_Thread::thread_id(jt->vthread()));
+      }
+      tty->print_cr(" (in step 2) waiting for initialization in thread %s, has_pending_exception=%s",
+        init_thread_name(), HAS_PENDING_EXCEPTION ? "YES" : "no");
+    }
       ThreadWaitingForClassInit twcl(THREAD, this);
+      if (PrintCompilation) {
+        ResourceMark rm(jt);
+        tty->print("%llu: Thread \"%s\"", (uint64_t) tty->time_stamp().milliseconds(), jt->name());
+        if (jt->is_vthread_mounted()) {
+          tty->print(" (vthread: #%lld)", java_lang_Thread::thread_id(jt->vthread()));
+        }
+        tty->print_cr(" (in step 2 before ol.wait_uninterruptibly()) waiting for initialization in thread %s, preempting=%s, has_pending_exception=%s",
+          init_thread() != nullptr ? init_thread_name() : "null", jt->preempting() ? "YES" : "no", HAS_PENDING_EXCEPTION ? "YES" : "no");
+      }
       ol.wait_uninterruptibly(CHECK_PREEMPTABLE);
+      if (PrintCompilation) {
+        ResourceMark rm(jt);
+        tty->print("%llu: Thread \"%s\"", (uint64_t) tty->time_stamp().milliseconds(), jt->name());
+        if (jt->is_vthread_mounted()) {
+          tty->print(" (vthread: #%lld)", java_lang_Thread::thread_id(jt->vthread()));
+        }
+        tty->print_cr(" (in step 2 after ol.wait_uninterruptibly()) waiting for initialization in thread %s, preempting=%s, has_pending_exception=%s",
+          init_thread() != nullptr ? init_thread_name() : "null", jt->preempting() ? "YES" : "no", HAS_PENDING_EXCEPTION ? "YES" : "no");
+      }
+    }
+
+  if (PrintCompilation2) {
+      ResourceMark rm(jt);
+      tty->print("%llu: Thread \"%s\"", (uint64_t) tty->time_stamp().milliseconds(), jt->name());
+      if (jt->is_vthread_mounted()) {
+        tty->print(" (vthread: #%lld)", java_lang_Thread::thread_id(jt->vthread()));
+      }
+      tty->print_cr(" is_being_initialized=%s (after step 2)", is_being_initialized() ? "YES" : "no");
     }
 
     // Step 3
@@ -1272,6 +1363,15 @@ void InstanceKlass::initialize_impl(TRAPS) {
       return;
     }
 
+  if (PrintCompilation2) {
+      ResourceMark rm(jt);
+    tty->print("%llu: Thread \"%s\"", (uint64_t) tty->time_stamp().milliseconds(), jt->name());
+    if (jt->is_vthread_mounted()) {
+      tty->print(" (vthread: #%lld)", java_lang_Thread::thread_id(jt->vthread()));
+    }
+      tty->print_cr(" is_being_initialized=%s (after step 3)", is_being_initialized() ? "YES" : "no");
+    }
+
     // Step 4
     if (is_initialized()) {
       if (debug_logging_enabled) {
@@ -1281,6 +1381,15 @@ void InstanceKlass::initialize_impl(TRAPS) {
       }
       DTRACE_CLASSINIT_PROBE_WAIT(concurrent, -1, wait);
       return;
+    }
+
+  if (PrintCompilation2) {
+      ResourceMark rm(jt);
+    tty->print("%llu: Thread \"%s\"", (uint64_t) tty->time_stamp().milliseconds(), jt->name());
+    if (jt->is_vthread_mounted()) {
+      tty->print(" (vthread: #%lld)", java_lang_Thread::thread_id(jt->vthread()));
+    }
+      tty->print_cr(" is_being_initialized=%s (after step 4)", is_being_initialized() ? "YES" : "no");
     }
 
     // Step 5
@@ -1304,6 +1413,14 @@ void InstanceKlass::initialize_impl(TRAPS) {
                         ss.as_string(), cause);
       }
     } else {
+      if (PrintCompilation2) {
+        ResourceMark rm(jt);
+        tty->print("%llu: Thread \"%s\"", (uint64_t) tty->time_stamp().milliseconds(), jt->name());
+        if (jt->is_vthread_mounted()) {
+          tty->print(" (vthread: #%lld)", java_lang_Thread::thread_id(jt->vthread()));
+        }
+        tty->print_cr(" is_being_initialized=%s (step 6)", is_being_initialized() ? "YES" : "no");
+      }
 
       // Step 6
       set_init_state(being_initialized);
@@ -1316,9 +1433,18 @@ void InstanceKlass::initialize_impl(TRAPS) {
     }
   }
 
+  if (PrintCompilation2) {
+    ResourceMark rm(jt);
+    tty->print("%llu: Thread \"%s\"", (uint64_t) tty->time_stamp().milliseconds(), jt->name());
+    if (jt->is_vthread_mounted()) {
+      tty->print(" (vthread: #%lld)", java_lang_Thread::thread_id(jt->vthread()));
+    }
+    tty->print_cr(" is_being_initialized=%s (after step 6)", is_being_initialized() ? "YES" : "no");
+  }
+
   // Block preemption once we are the initializer thread. Unmounting now
   // would complicate the reentrant case (identity is platform thread).
-  NoPreemptMark npm(THREAD);
+  NoPreemptMark npm(THREAD, __FILE__, __LINE__);
 
   // Step 7
   // Next, if C is a class rather than an interface, initialize it's super class and super
@@ -1352,6 +1478,15 @@ void InstanceKlass::initialize_impl(TRAPS) {
     }
   }
 
+  if (PrintCompilation2) {
+    ResourceMark rm(jt);
+    tty->print("%llu: Thread \"%s\"", (uint64_t) tty->time_stamp().milliseconds(), jt->name());
+    if (jt->is_vthread_mounted()) {
+      tty->print(" (vthread: #%lld)", java_lang_Thread::thread_id(jt->vthread()));
+    }
+    tty->print_cr(" is_being_initialized=%s (after step 7)", is_being_initialized() ? "YES" : "no");
+  }
+
 
   // Step 8
   {
@@ -1373,6 +1508,15 @@ void InstanceKlass::initialize_impl(TRAPS) {
       }
       call_class_initializer(THREAD);
     }
+  }
+
+  if (PrintCompilation2) {
+    ResourceMark rm(jt);
+    tty->print("%llu: Thread \"%s\"", (uint64_t) tty->time_stamp().milliseconds(), jt->name());
+    if (jt->is_vthread_mounted()) {
+      tty->print(" (vthread: #%lld)", java_lang_Thread::thread_id(jt->vthread()));
+    }
+    tty->print_cr(" is_being_initialized=%s (after step 8)", is_being_initialized() ? "YES" : "no");
   }
 
   // Step 9
@@ -1414,7 +1558,7 @@ void InstanceKlass::initialize_impl(TRAPS) {
 void InstanceKlass::set_initialization_state_and_notify(ClassState state, TRAPS) {
   Handle h_init_lock(THREAD, init_lock());
   if (h_init_lock() != nullptr) {
-    ObjectLocker ol(h_init_lock, THREAD);
+    ObjectLocker ol(h_init_lock, __FILE__, __LINE__, THREAD);
     set_init_thread(nullptr); // reset _init_thread before changing _init_state
     set_init_state(state);
     fence_and_clear_init_lock();

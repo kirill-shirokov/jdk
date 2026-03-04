@@ -282,7 +282,7 @@ ResolvedMethodEntry* ConstantPoolCache::set_method_handle(int method_index, cons
   // or MethodType constant pool cache entries.
   assert(resolved_references() != nullptr,
          "a resolved_references array should have been created for this class");
-  ObjectLocker ol(resolved_references, current);
+  ObjectLocker ol(resolved_references, __FILE__, __LINE__, current);
 
   ResolvedMethodEntry* method_entry = resolved_method_entry_at(method_index);
   if (method_entry->is_resolved(invoke_code)) {
@@ -727,7 +727,7 @@ bool ConstantPoolCache::save_and_throw_indy_exc(
   objArrayHandle resolved_references(current, cpool->resolved_references());
   assert(resolved_references() != nullptr,
          "a resolved_references array should have been created for this class");
-  ObjectLocker ol(resolved_references, current);
+  ObjectLocker ol(resolved_references, __FILE__, __LINE__, current);
 
   // if the indy_info is resolved or the indy_resolution_failed flag is set then another
   // thread either succeeded in resolving the method or got a LinkageError
@@ -760,7 +760,7 @@ oop ConstantPoolCache::set_dynamic_call(const CallInfo &call_info, int index) {
   objArrayHandle resolved_references(current, cp->resolved_references());
   assert(resolved_references() != nullptr,
          "a resolved_references array should have been created for this class");
-  ObjectLocker ol(resolved_references, current);
+  ObjectLocker ol(resolved_references, __FILE__, __LINE__, current);
   assert(index >= 0, "Indy index must be positive at this point");
 
   if (resolved_indy_entry_at(index)->method() != nullptr) {

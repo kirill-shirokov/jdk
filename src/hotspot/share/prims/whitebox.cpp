@@ -918,7 +918,9 @@ WB_ENTRY(jboolean, WB_IsMethodCompilable(JNIEnv* env, jobject o, jobject method,
       return can_be_compiled_at_level(mh, is_osr, CompLevel_full_optimization);
     } else if (excluded_c2) {
       // C2 only has ExcludeOption set: Check if compilable with C1.
-      return can_be_compiled_at_level(mh, is_osr, CompLevel_simple);
+      return can_be_compiled_at_level(mh, is_osr, CompLevel_simple)
+          || can_be_compiled_at_level(mh, is_osr, CompLevel_limited_profile)
+          || can_be_compiled_at_level(mh, is_osr, CompLevel_full_profile);
     }
   } else if (comp_level > CompLevel_none && is_excluded_for_compiler(CompileBroker::compiler((int)comp_level), comp_level, mh)) {
     // Compilation of 'method' excluded by compiler used for 'comp_level'.

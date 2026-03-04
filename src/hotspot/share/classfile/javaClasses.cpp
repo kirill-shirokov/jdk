@@ -2127,10 +2127,18 @@ int java_lang_VirtualThread::state(oop vthread) {
 }
 
 void java_lang_VirtualThread::set_state(oop vthread, int state) {
+  if (PrintCompilation) {
+    tty->print_cr("VT-%lld: set_state(%d)",
+      java_lang_Thread::thread_id(vthread), state);
+  }
   vthread->release_int_field_put(_state_offset, state);
 }
 
 int java_lang_VirtualThread::cmpxchg_state(oop vthread, int old_state, int new_state) {
+  if (PrintCompilation) {
+    tty->print_cr("VT-%lld: cmpxchg_state(%d -> %d)",
+      java_lang_Thread::thread_id(vthread), old_state, new_state);
+  }
   jint* addr = vthread->field_addr<jint>(_state_offset);
   int res = AtomicAccess::cmpxchg(addr, old_state, new_state);
   return res;

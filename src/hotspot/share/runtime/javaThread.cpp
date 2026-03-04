@@ -619,7 +619,7 @@ bool JavaThread::get_and_clear_interrupted() {
   JavaThread* current = JavaThread::current();
   HandleMark hm(current);
   Handle thread_h(current, thread_oop);
-  ObjectLocker lock(Handle(current, java_lang_Thread::interrupt_lock(thread_h())), current);
+  ObjectLocker lock(Handle(current, java_lang_Thread::interrupt_lock(thread_h())), __FILE__, __LINE__, current);
 
   // re-check the interrupt status under the interruptLock protection
   bool interrupted = java_lang_Thread::interrupted(thread_h());
@@ -790,7 +790,7 @@ static void ensure_join(JavaThread* thread) {
   // We do not need to grab the Threads_lock, since we are operating on ourself.
   Handle threadObj(thread, thread->threadObj());
   assert(threadObj.not_null(), "java thread object must exist");
-  ObjectLocker lock(threadObj, thread);
+  ObjectLocker lock(threadObj, __FILE__, __LINE__, thread);
   // Thread is exiting. So set thread_status field in  java.lang.Thread class to TERMINATED.
   java_lang_Thread::set_thread_status(threadObj(), JavaThreadStatus::TERMINATED);
   // Clear the native thread instance - this makes isAlive return false and allows the join()
@@ -2255,6 +2255,28 @@ void JavaThread::add_oop_handles_for_release() {
   _oop_handle_list = new_head;
   Service_lock->notify_all();
 }
+
+NoPreemptMark::NoPreemptMark(JavaThread* thread, const char * const file, int line, bool ignore_mark)
+    : _thread(thread), _ce(thread->last_continuation()), _unpin(false), _file(file), _line(line) {
+  if (_ce != nullptr && !ignore_mark) {
+    if (PrintCompilation) {
+      tty->print_cr("<%lld> %s:%d NoPreemptMark pin", (int64_t) java_lang_Thread::thread_id(_thread->threadObj()),
+        _file, _line);
+    }
+    _unpin = _ce->pin();
+  }
+}
+
+NoPreemptMark::~NoPreemptMark() {
+  if (_unpin) {
+    _ce->unpin();
+    if (PrintCompilation) {
+      tty->print_cr("<%lld> %s:%d NoPreemptMark unpin", (int64_t) java_lang_Thread::thread_id(_thread->threadObj()),
+        _file, _line);
+    }
+  }
+}
+
 
 #if INCLUDE_JFR
 void JavaThread::set_last_freeze_fail_result(freeze_result result) {

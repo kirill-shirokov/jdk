@@ -63,7 +63,7 @@ class LockerThread : public JavaTestThread {
     // still be inflated after the notify_all() call. Deflation can't happen
     // while an ObjectMonitor is "busy" and being locked is the most "busy"
     // state we have...
-    ObjectLocker ol(h_obj, THREAD);
+    ObjectLocker ol(h_obj, __FILE__, __LINE__, THREAD);
     ol.notify_all(THREAD);
     assert_test_pattern(h_obj, "monitor");
   }
@@ -84,7 +84,7 @@ TEST_VM(markWord, printing) {
 
   // Thread tries to lock it.
   {
-    ObjectLocker ol(h_obj, THREAD);
+    ObjectLocker ol(h_obj, __FILE__, __LINE__, THREAD);
     assert_test_pattern(h_obj, "locked");
   }
   assert_test_pattern(h_obj, "is_unlocked no_hash");
@@ -95,7 +95,7 @@ TEST_VM(markWord, printing) {
 
   // Wait gets the lock inflated.
   {
-    ObjectLocker ol(h_obj, THREAD);
+    ObjectLocker ol(h_obj, __FILE__, __LINE__, THREAD);
 
     Semaphore done(0);
     LockerThread* st;
