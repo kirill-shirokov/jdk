@@ -819,7 +819,17 @@ static bool scan_value(enum OptionType type, char* line, int& total_bytes_read,
   const char* type_str = optiontype2name(type);
   int skipped = skip_whitespace(line);
   total_bytes_read += skipped;
-  if (type == OptionType::Intx) {
+  if (type == OptionType::Int) {
+    int value;
+    bool success = sscanf(line, "%d%n", &value, &bytes_read) == 1;
+    if (success) {
+      total_bytes_read += bytes_read;
+      return register_command(matcher, option, errorbuf, buf_size, value);
+    } else {
+      jio_snprintf(errorbuf, buf_size, "Value cannot be read for option '%s' of type '%s'", ccname, type_str);
+      return false;
+    }
+  } else if (type == OptionType::Intx) {
     intx value;
     bool success = false;
     switch (option) {
