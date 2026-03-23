@@ -51,18 +51,18 @@ class methodHandle;
   option(Help,  "help",  Unknown) \
   option(Quiet, "quiet", Unknown) \
   option(Log, "log", Bool) \
-  option(Print, "print", Intx) \
+  option(Print, "print", Int) \
   option(Inline,  "inline", Bool) \
   option(DelayInline,  "delayinline", Bool) \
   option(DontInline,  "dontinline", Bool) \
   option(Blackhole,  "blackhole", Bool) \
-  option(CompileOnly, "compileonly", Intx) \
-  option(Exclude, "exclude", Intx) \
-  option(Break, "break", Intx) \
+  option(CompileOnly, "compileonly", Int) \
+  option(Exclude, "exclude", Int) \
+  option(Break, "break", Int) \
   option(BreakAtExecute, "BreakAtExecute", Bool) \
   option(BreakAtCompile, "BreakAtCompile", Bool) \
   option(MemLimit, "MemLimit", Intx) \
-  option(MemStat, "MemStat", Uintx) \
+  option(MemStat, "MemStat", Int) \
   option(PrintAssembly, "PrintAssembly", Bool) \
   option(PrintCompilation, "PrintCompilation", Bool) \
   option(PrintInlining, "PrintInlining", Bool) \
@@ -87,8 +87,8 @@ class methodHandle;
 NOT_PRODUCT(option(TraceEscapeAnalysis, "TraceEscapeAnalysis", Bool)) \
 NOT_PRODUCT(option(PrintIdeal, "PrintIdeal", Bool))  \
 NOT_PRODUCT(option(PrintIdealPhase, "PrintIdealPhase", Ccstrlist)) \
-NOT_PRODUCT(option(PhasePrintLevel, "PhasePrintLevel", Intx)) \
-NOT_PRODUCT(option(IGVPrintLevel, "IGVPrintLevel", Intx)) \
+NOT_PRODUCT(option(PhasePrintLevel, "PhasePrintLevel", Int)) \
+NOT_PRODUCT(option(IGVPrintLevel, "IGVPrintLevel", Int)) \
 NOT_PRODUCT(option(TraceAutoVectorization, "TraceAutoVectorization", Ccstrlist)) \
 NOT_PRODUCT(option(TraceMergeStores, "TraceMergeStores", Ccstrlist)) \
   option(Vectorize, "Vectorize", Bool) \

@@ -75,10 +75,10 @@ inline int comp_level_bitmask(int comp_level) {
   return 1 << (comp_level - 1);
 }
 
-static const intx default_comp_level_argument = comp_level_bitmask(CompLevel_simple)
-                                               | comp_level_bitmask(CompLevel_limited_profile)
-                                               | comp_level_bitmask(CompLevel_full_profile)
-                                               | comp_level_bitmask(CompLevel_full_optimization);
+static const int default_comp_level_argument = comp_level_bitmask(CompLevel_simple)
+                                             | comp_level_bitmask(CompLevel_limited_profile)
+                                             | comp_level_bitmask(CompLevel_full_profile)
+                                             | comp_level_bitmask(CompLevel_full_optimization);
 
 static const char* optiontype_names[] = {
 #define enum_of_types(type, name) name,
@@ -499,7 +499,7 @@ bool CompilerOracle::applies_to_comp_level(const methodHandle& method, CompileCo
     return false;
   }
 
-  intx command_level = 0;
+  int command_level = 0;
   if (!has_option_value(method, command, command_level)) {
     return false;
   }
@@ -803,7 +803,7 @@ static bool parseMemLimit(const char* line, intx& value, int& bytes_read, char* 
   return true;
 }
 
-static bool parseMemStat(const char* line, uintx& value, int& bytes_read, char* errorbuf, const int buf_size) {
+static bool parseMemStat(const char* line, int& value, int& bytes_read, char* errorbuf, const int buf_size) {
 
 #define IF_ENUM_STRING(S, CMD)                \
   if (strncasecmp(line, S, strlen(S)) == 0) { \
@@ -813,10 +813,10 @@ static bool parseMemStat(const char* line, uintx& value, int& bytes_read, char* 
   }
 
   IF_ENUM_STRING("collect", {
-    value = (uintx)MemStatAction::collect;
+    value = static_cast<int>(MemStatAction::collect);
   });
   IF_ENUM_STRING("print", {
-    value = (uintx)MemStatAction::print;
+    value = static_cast<int>(MemStatAction::print);
   });
 #undef IF_ENUM_STRING
 
@@ -834,21 +834,11 @@ static bool scan_value(enum OptionType type, char* line, int& total_bytes_read,
   total_bytes_read += skipped;
   if (type == OptionType::Int) {
     int value;
-    bool success = sscanf(line, "%d%n", &value, &bytes_read) == 1;
-    if (success) {
-      total_bytes_read += bytes_read;
-      return register_command(matcher, option, errorbuf, buf_size, value);
-    } else {
-      jio_snprintf(errorbuf, buf_size, "Value cannot be read for option '%s' of type '%s'", ccname, type_str);
-      return false;
-    }
-  } else if (type == OptionType::Intx) {
-    intx value;
-    bool success = false;
+    bool success;
     switch (option) {
-      case CompileCommandEnum::MemLimit:
-        // Special parsing for MemLimit
-        success = parseMemLimit(line, value, bytes_read, errorbuf, buf_size);
+      case CompileCommandEnum::MemStat:
+        // Special parsing for MemStat
+        success = parseMemStat(line, value, bytes_read, errorbuf, buf_size);
         break;
       case CompileCommandEnum::Break:
       case CompileCommandEnum::CompileOnly:
@@ -860,12 +850,29 @@ static bool scan_value(enum OptionType type, char* line, int& total_bytes_read,
             value = default_comp_level_argument;
             success = true;
         } else {
-            success = sscanf(line, "%zd%n", &value, &bytes_read) == 1;
+            success = sscanf(line, "%d%n", &value, &bytes_read) == 1;
         }
         break;
       default:
         // Is it a raw number?
-        success = sscanf(line, "%zd%n", &value, &bytes_read) == 1;
+        success = sscanf(line, "%d%n", &value, &bytes_read) == 1;
+    }
+    if (success) {
+      total_bytes_read += bytes_read;
+      return register_command(matcher, option, errorbuf, buf_size, value);
+    } else {
+      jio_snprintf(errorbuf, buf_size, "Value cannot be read for option '%s' of type '%s'", ccname, type_str);
+      return false;
+    }
+  } else if (type == OptionType::Intx) {
+    intx value;
+    bool success = false;
+    if (option == CompileCommandEnum::MemLimit) {
+      // Special parsing for MemLimit
+      success = parseMemLimit(line, value, bytes_read, errorbuf, buf_size);
+    } else {
+      // Is it a raw number?
+      success = sscanf(line, "%zd%n", &value, &bytes_read) == 1;
     }
     if (success) {
       total_bytes_read += bytes_read;
@@ -876,14 +883,8 @@ static bool scan_value(enum OptionType type, char* line, int& total_bytes_read,
     }
   } else if (type == OptionType::Uintx) {
     uintx value;
-    bool success = false;
-    if (option == CompileCommandEnum::MemStat) {
-      // Special parsing for MemStat
-      success = parseMemStat(line, value, bytes_read, errorbuf, buf_size);
-    } else {
-      // parse as raw number
-      success = sscanf(line, "%zu%n", &value, &bytes_read) == 1;
-    }
+    // parse as raw number
+    bool success = sscanf(line, "%zu%n", &value, &bytes_read) == 1;
     if (success) {
       total_bytes_read += bytes_read;
       return register_command(matcher, option, errorbuf, buf_size, value);
@@ -1194,7 +1195,7 @@ bool CompilerOracle::parse_from_line(char* line) {
           break;
         case CompileCommandEnum::MemStat:
           // MemStat default action is to collect data but to not print
-          if (!register_command(matcher, option, error_buf, sizeof(error_buf), (uintx)MemStatAction::collect)) {
+          if (!register_command(matcher, option, error_buf, sizeof(error_buf), (int)MemStatAction::collect)) {
             print_parse_error(error_buf, original.get());
             return false;
           }

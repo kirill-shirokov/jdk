@@ -72,7 +72,7 @@ public class TestInvalidCompileCommand {
             "Missing type 'intx' before option 'RepeatCompilation'"
         },
         {
-            "Missing type 'uintx' before option 'MemStat'"
+            "Missing type 'int' before option 'MemStat'"
         },
         {
             "Missing type 'ccstrlist' before option 'ControlIntrinsic'"
