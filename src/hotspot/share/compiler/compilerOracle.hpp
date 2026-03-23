@@ -38,6 +38,7 @@ class methodHandle;
 
 //       OPTION_TYPES: type, name
 #define OPTION_TYPES(type) \
+  type(Int, "int") \
   type(Intx, "intx") \
   type(Uintx, "uintx") \
   type(Bool, "bool") \

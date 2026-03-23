@@ -116,6 +116,10 @@ static OptionType get_type_for() {
   return OptionType::Unknown;
 };
 
+template<> OptionType get_type_for<int>() {
+  return OptionType::Int;
+}
+
 template<> OptionType get_type_for<intx>() {
   return OptionType::Intx;
 }
@@ -169,6 +173,7 @@ class TypedMethodOptionMatcher : public MethodMatcher {
 
   union {
     bool bool_value;
+    int int_value;
     intx intx_value;
     uintx uintx_value;
     double double_value;
@@ -207,6 +212,10 @@ class TypedMethodOptionMatcher : public MethodMatcher {
 };
 
 // A few templated accessors instead of a full template class.
+template<> int TypedMethodOptionMatcher::value<int>() {
+  return _u.int_value;
+}
+
 template<> intx TypedMethodOptionMatcher::value<intx>() {
   return _u.intx_value;
 }
@@ -225,6 +234,10 @@ template<> double TypedMethodOptionMatcher::value<double>() {
 
 template<> ccstr TypedMethodOptionMatcher::value<ccstr>() {
   return _u.ccstr_value;
+}
+
+template<> void TypedMethodOptionMatcher::set_value(int value) {
+  _u.int_value = value;
 }
 
 template<> void TypedMethodOptionMatcher::set_value(intx value) {
@@ -253,6 +266,9 @@ void TypedMethodOptionMatcher::print() {
   const char* name = option2name(_option);
   enum OptionType type = option2type(_option);
   switch (type) {
+    case OptionType::Int:
+    tty->print_cr(" int %s = %d", name, value<int>());
+    break;
     case OptionType::Intx:
     tty->print_cr(" intx %s = %zd", name, value<intx>());
     break;
@@ -452,6 +468,7 @@ bool CompilerOracle::has_any_command_set() {
 }
 
 // Explicit instantiation for all OptionTypes supported.
+template bool CompilerOracle::has_option_value<int>(const methodHandle& method, CompileCommandEnum option, int& value);
 template bool CompilerOracle::has_option_value<intx>(const methodHandle& method, CompileCommandEnum option, intx& value);
 template bool CompilerOracle::has_option_value<uintx>(const methodHandle& method, CompileCommandEnum option, uintx& value);
 template bool CompilerOracle::has_option_value<bool>(const methodHandle& method, CompileCommandEnum option, bool& value);
@@ -470,6 +487,7 @@ bool CompilerOracle::option_matches_type(CompileCommandEnum option, T& value) {
   return (get_type_for<T>() == option_type);
 }
 
+template bool CompilerOracle::option_matches_type<int>(CompileCommandEnum option, int& value);
 template bool CompilerOracle::option_matches_type<intx>(CompileCommandEnum option, intx& value);
 template bool CompilerOracle::option_matches_type<uintx>(CompileCommandEnum option, uintx& value);
 template bool CompilerOracle::option_matches_type<bool>(CompileCommandEnum option, bool& value);
@@ -1069,7 +1087,7 @@ bool CompilerOracle::parse_from_line(char* line) {
     // Type (1) is used to enable a boolean option for a method.
     //
     // Type (2) is used to support options with a value. Values can have the
-    // the following types: intx, uintx, bool, ccstr, ccstrlist, and double.
+    // the following types: int, intx, uintx, bool, ccstr, ccstrlist, and double.
 
     char option_type[256]; // stores option for Type (1) and type of Type (2)
     skip_comma(line);
