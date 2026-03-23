@@ -48,19 +48,19 @@ public class CompileLevelParseTest {
             ProcessTools.executeTestJava("-XX:CompileCommand=" + cmd + "," + METHOD_EXP, "-version")
                     .shouldHaveExitValue(0)
                     .shouldNotContain("CompileCommand: An error occurred during parsing")
-                    .shouldContain("CompileCommand: " + cmd + " " + METHOD_EXP + " intx " + cmd + " = " + DEFAULT_COMP_LEVEL); // should be registered
+                    .shouldContain("CompileCommand: " + cmd + " " + METHOD_EXP + " int " + cmd + " = " + DEFAULT_COMP_LEVEL); // should be registered
             for (String level : compLevels) {
                 ProcessTools.executeTestJava("-XX:CompileCommand=" + cmd + "," + METHOD_EXP + "," + level, "-version")
                         .shouldHaveExitValue(0)
                         .shouldNotContain("CompileCommand: An error occurred during parsing")
-                        .shouldContain("CompileCommand: " + cmd + " " + METHOD_EXP + " intx " + cmd + " = " + level); // should be registered
+                        .shouldContain("CompileCommand: " + cmd + " " + METHOD_EXP + " int " + cmd + " = " + level); // should be registered
             }
             // Note that values like "1suffix" are still accepted
             for (String incorrectLevel : List.of("c1", "true", "false")) {
                 ProcessTools.executeTestJava("-XX:CompileCommand=" + cmd + "," + METHOD_EXP + "," + incorrectLevel, "-version")
                         .shouldHaveExitValue(1)
                         .shouldContain("CompileCommand: An error occurred during parsing")
-                        .shouldNotContain("CompileCommand: " + cmd + " " + METHOD_EXP + " intx " + cmd + " = " + incorrectLevel);
+                        .shouldNotContain("CompileCommand: " + cmd + " " + METHOD_EXP + " int " + cmd + " = " + incorrectLevel);
             }
         }
     }
