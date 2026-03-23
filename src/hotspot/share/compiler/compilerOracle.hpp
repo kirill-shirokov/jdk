@@ -95,8 +95,9 @@ NOT_PRODUCT(option(TraceMergeStores, "TraceMergeStores", Ccstrlist)) \
   option(CloneMapDebug, "CloneMapDebug", Bool) \
   option(IncrementalInlineForceCleanup, "IncrementalInlineForceCleanup", Bool) \
   option(MaxNodeLimit, "MaxNodeLimit", Intx)  \
-NOT_PRODUCT(option(TestOptionInt,    "TestOptionInt",    Intx)) \
-NOT_PRODUCT(option(TestOptionUint,   "TestOptionUint",   Uintx)) \
+NOT_PRODUCT(option(TestOptionInt,    "TestOptionInt",    Int)) \
+NOT_PRODUCT(option(TestOptionIntx,   "TestOptionIntx",   Intx)) \
+NOT_PRODUCT(option(TestOptionUint,   "TestOptionUintx",  Uintx)) \
 NOT_PRODUCT(option(TestOptionBool,   "TestOptionBool",   Bool)) \
 NOT_PRODUCT(option(TestOptionBool2,  "TestOptionBool2",  Bool)) \
 NOT_PRODUCT(option(TestOptionStr,    "TestOptionStr",    Ccstr)) \
