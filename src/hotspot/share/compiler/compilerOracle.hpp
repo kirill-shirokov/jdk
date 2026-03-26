@@ -39,6 +39,7 @@ class methodHandle;
 //       OPTION_TYPES: type, name
 #define OPTION_TYPES(type) \
   type(Int, "int") \
+  type(Uint, "uint") \
   type(Intx, "intx") \
   type(Uintx, "uintx") \
   type(Bool, "bool") \
@@ -51,18 +52,18 @@ class methodHandle;
   option(Help,  "help",  Unknown) \
   option(Quiet, "quiet", Unknown) \
   option(Log, "log", Bool) \
-  option(Print, "print", Int) \
+  option(Print, "print", Uint) \
   option(Inline,  "inline", Bool) \
   option(DelayInline,  "delayinline", Bool) \
   option(DontInline,  "dontinline", Bool) \
   option(Blackhole,  "blackhole", Bool) \
-  option(CompileOnly, "compileonly", Int) \
-  option(Exclude, "exclude", Int) \
-  option(Break, "break", Int) \
+  option(CompileOnly, "compileonly", Uint) \
+  option(Exclude, "exclude", Uint) \
+  option(Break, "break", Uint) \
   option(BreakAtExecute, "BreakAtExecute", Bool) \
   option(BreakAtCompile, "BreakAtCompile", Bool) \
   option(MemLimit, "MemLimit", Intx) \
-  option(MemStat, "MemStat", Int) \
+  option(MemStat, "MemStat", Uintx) \
   option(PrintAssembly, "PrintAssembly", Bool) \
   option(PrintCompilation, "PrintCompilation", Bool) \
   option(PrintInlining, "PrintInlining", Bool) \
@@ -96,6 +97,7 @@ NOT_PRODUCT(option(TraceMergeStores, "TraceMergeStores", Ccstrlist)) \
   option(IncrementalInlineForceCleanup, "IncrementalInlineForceCleanup", Bool) \
   option(MaxNodeLimit, "MaxNodeLimit", Intx)  \
 NOT_PRODUCT(option(TestOptionInt,    "TestOptionInt",    Int)) \
+NOT_PRODUCT(option(TestOptionUint,   "TestOptionUint",   Uint)) \
 NOT_PRODUCT(option(TestOptionIntx,   "TestOptionIntx",   Intx)) \
 NOT_PRODUCT(option(TestOptionUint,   "TestOptionUintx",  Uintx)) \
 NOT_PRODUCT(option(TestOptionBool,   "TestOptionBool",   Bool)) \

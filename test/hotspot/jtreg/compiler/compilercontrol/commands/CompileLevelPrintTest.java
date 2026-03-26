@@ -198,10 +198,10 @@ public class CompileLevelPrintTest {
                                     && testeeState.compiler2QueueSize.get() < 5)),
                             "Compiler queue is still not empty");
                     Asserts.assertTrue(testeeState.compileCommandsReported.contains(
-                            compileCmd + " " + TEST_METHOD_NAME_DOT + " int " + compileCmd + " = " + cmdCompLevel),
+                            compileCmd + " " + TEST_METHOD_NAME_DOT + " uint " + compileCmd + " = " + cmdCompLevel),
                             "'CompileCommand: " + compileCmd + "...' was not printed");
                     Asserts.assertTrue(testeeState.compileCommandsReported.contains(
-                            "print " + TEST_METHOD_NAME_DOT + " int print = " + printCmdCompLevel),
+                            "print " + TEST_METHOD_NAME_DOT + " uint print = " + printCmdCompLevel),
                             "'CompileCommand: print ...' was not printed");
 
                     System.out.println("##> Order testee to start");
