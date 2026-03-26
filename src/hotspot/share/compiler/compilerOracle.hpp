@@ -99,7 +99,7 @@ NOT_PRODUCT(option(TraceMergeStores, "TraceMergeStores", Ccstrlist)) \
 NOT_PRODUCT(option(TestOptionInt,    "TestOptionInt",    Int)) \
 NOT_PRODUCT(option(TestOptionUint,   "TestOptionUint",   Uint)) \
 NOT_PRODUCT(option(TestOptionIntx,   "TestOptionIntx",   Intx)) \
-NOT_PRODUCT(option(TestOptionUint,   "TestOptionUintx",  Uintx)) \
+NOT_PRODUCT(option(TestOptionUintx,  "TestOptionUintx",  Uintx)) \
 NOT_PRODUCT(option(TestOptionBool,   "TestOptionBool",   Bool)) \
 NOT_PRODUCT(option(TestOptionBool2,  "TestOptionBool2",  Bool)) \
 NOT_PRODUCT(option(TestOptionStr,    "TestOptionStr",    Ccstr)) \
