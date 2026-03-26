@@ -51,7 +51,7 @@ public class CheckCompileCommandOption {
     // Type (1) is used to enable a boolean option for a method.
     //
     // Type (2) is used to support options with a value. Values can
-    // have the following types: int, intx, uintx, bool, ccstr,
+    // have the following types: int, uint, intx, uintx, bool, ccstr,
     // ccstrlist, and double.
 
     private static final String[][] FILE_ARGUMENTS = {
@@ -87,7 +87,7 @@ public class CheckCompileCommandOption {
             "Test.test const char* TestOptionStr = '_foo'",
             "Test.test bool TestOptionBool = false",
             "Test.test int TestOptionInt = -1",
-            "Test.test uint TestOptionInt = 1",
+            "Test.test uint TestOptionUint = 1",
             "Test.test intx TestOptionIntx = -1",
             "Test.test uintx TestOptionUintx = 1",
             "Test.test bool TestOptionBool2 = true",
@@ -135,7 +135,7 @@ public class CheckCompileCommandOption {
             "Test.test const char* TestOptionStr = '_foo'",
             "Test.test bool TestOptionBool = false",
             "Test.test int TestOptionInt = -1",
-            "Test.test int TestOptionUint = 1",
+            "Test.test uint TestOptionUint = 1",
             "Test.test intx TestOptionIntx = -1",
             "Test.test uintx TestOptionUintx = 1",
             "Test.test bool TestOptionBool2 = true",
@@ -185,7 +185,7 @@ public class CheckCompileCommandOption {
             "CompileCommand: TestOptionStr Test.test const char* TestOptionStr = '_foo'",
             "CompileCommand: TestOptionBool Test.test bool TestOptionBool = false",
             "CompileCommand: TestOptionInt Test.test int TestOptionInt = -1",
-            "CompileCommand: TestOptionInt Test.test uint TestOptionUint = 1",
+            "CompileCommand: TestOptionUint Test.test uint TestOptionUint = 1",
             "CompileCommand: TestOptionIntx Test.test intx TestOptionIntx = -1",
             "CompileCommand: TestOptionUintx Test.test uintx TestOptionUintx = 1",
             "CompileCommand: TestOptionBool2 Test.test bool TestOptionBool2 = true",
@@ -200,8 +200,12 @@ public class CheckCompileCommandOption {
             "-XX:CompileCommand=TestOptionInt,Test::test,_foo",
             "-XX:CompileCommand=TestOptionUint,Test::test,_foo",
             "-XX:CompileCommand=TestOptionIntx,Test::test,_foo",
+            "-XX:CompileCommand=TestOptionUintx,Test::test,_foo",
             "-XX:CompileCommand=TestOptionBool,Test::test,1",
             "-XX:CompileCommand=TestOptionDouble,Test::test,-1",
+            "-XX:CompileCommand=TestOptionInt,Test::test",
+            "-XX:CompileCommand=TestOptionUint,Test::test",
+            "-XX:CompileCommand=TestOptionIntx,Test::test",
             "-XX:CompileCommand=TestOptionUintx,Test::test",
             "-XX:CompileCommand=TestOptionBool2,Test::test,falsee",
             "-XX:CompileCommand=TestOptionDouble,Test::test,true",
@@ -216,8 +220,12 @@ public class CheckCompileCommandOption {
             "Value cannot be read for option 'TestOptionInt' of type 'int'",
             "Value cannot be read for option 'TestOptionUint' of type 'uint'",
             "Value cannot be read for option 'TestOptionIntx' of type 'intx'",
+            "Value cannot be read for option 'TestOptionUintx' of type 'uintx'",
             "Value cannot be read for option 'TestOptionBool' of type 'bool'",
             "Value cannot be read for option 'TestOptionDouble' of type 'double'",
+            "Option 'TestOptionInt' is not followed by a value",
+            "Option 'TestOptionUint' is not followed by a value",
+            "Option 'TestOptionIntx' is not followed by a value",
             "Option 'TestOptionUintx' is not followed by a value",
             "Value cannot be read for option 'TestOptionBool2' of type 'bool'",
             "Value cannot be read for option 'TestOptionDouble' of type 'double'",
