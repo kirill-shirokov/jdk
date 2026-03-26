@@ -790,7 +790,7 @@ static bool parseMemLimit(const char* line, intx& value, int& bytes_read, char* 
   return true;
 }
 
-static bool parseMemStat(const char* line, int& value, int& bytes_read, char* errorbuf, const int buf_size) {
+static bool parseMemStat(const char* line, uintx& value, int& bytes_read, char* errorbuf, const int buf_size) {
 
 #define IF_ENUM_STRING(S, CMD)                \
   if (strncasecmp(line, S, strlen(S)) == 0) { \
@@ -800,10 +800,10 @@ static bool parseMemStat(const char* line, int& value, int& bytes_read, char* er
   }
 
   IF_ENUM_STRING("collect", {
-    value = static_cast<int>(MemStatAction::collect);
+    value = (uintx)MemStatAction::collect;
   });
   IF_ENUM_STRING("print", {
-    value = static_cast<int>(MemStatAction::print);
+    value = (uintx)MemStatAction::print;
   });
 #undef IF_ENUM_STRING
 
@@ -823,10 +823,6 @@ static bool scan_value(enum OptionType type, char* line, int& total_bytes_read,
     int value;
     bool success;
     switch (option) {
-      case CompileCommandEnum::MemStat:
-        // Special parsing for MemStat
-        success = parseMemStat(line, value, bytes_read, errorbuf, buf_size);
-        break;
       case CompileCommandEnum::Break:
       case CompileCommandEnum::CompileOnly:
       case CompileCommandEnum::Exclude:
@@ -870,8 +866,14 @@ static bool scan_value(enum OptionType type, char* line, int& total_bytes_read,
     }
   } else if (type == OptionType::Uintx) {
     uintx value;
-    // parse as raw number
-    bool success = sscanf(line, "%zu%n", &value, &bytes_read) == 1;
+    bool success = false;
+    if (option == CompileCommandEnum::MemStat) {
+      // Special parsing for MemStat
+      success = parseMemStat(line, value, bytes_read, errorbuf, buf_size);
+    } else {
+      // parse as raw number
+      success = sscanf(line, "%zu%n", &value, &bytes_read) == 1;
+    }
     if (success) {
       total_bytes_read += bytes_read;
       return register_command(matcher, option, errorbuf, buf_size, value);
@@ -1182,7 +1184,7 @@ bool CompilerOracle::parse_from_line(char* line) {
           break;
         case CompileCommandEnum::MemStat:
           // MemStat default action is to collect data but to not print
-          if (!register_command(matcher, option, error_buf, sizeof(error_buf), (int)MemStatAction::collect)) {
+          if (!register_command(matcher, option, error_buf, sizeof(error_buf), (uintx)MemStatAction::collect)) {
             print_parse_error(error_buf, original.get());
             return false;
           }

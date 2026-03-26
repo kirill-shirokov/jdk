@@ -75,7 +75,7 @@ public class TestPhasePrintLevel {
         options.add(getTestClass());
         OutputAnalyzer oa = ProcessTools.executeTestJava(options);
         oa.shouldHaveExitValue(0)
-            .shouldContain("CompileCommand: PhasePrintLevel compiler/oracle/TestPhasePrintLevel$TestMain.test int PhasePrintLevel = " + compileCommandLevel)
+            .shouldContain("CompileCommand: PhasePrintLevel compiler/oracle/TestPhasePrintLevel$TestMain.test intx PhasePrintLevel = " + compileCommandLevel)
             .shouldNotContain("CompileCommand: An error occurred during parsing")
             .shouldNotContain("# A fatal error has been detected by the Java Runtime Environment");
         if (expectedPhase != null) {

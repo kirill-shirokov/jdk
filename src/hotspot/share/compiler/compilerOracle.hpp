@@ -87,8 +87,8 @@ class methodHandle;
 NOT_PRODUCT(option(TraceEscapeAnalysis, "TraceEscapeAnalysis", Bool)) \
 NOT_PRODUCT(option(PrintIdeal, "PrintIdeal", Bool))  \
 NOT_PRODUCT(option(PrintIdealPhase, "PrintIdealPhase", Ccstrlist)) \
-NOT_PRODUCT(option(PhasePrintLevel, "PhasePrintLevel", Int)) \
-NOT_PRODUCT(option(IGVPrintLevel, "IGVPrintLevel", Int)) \
+NOT_PRODUCT(option(PhasePrintLevel, "PhasePrintLevel", Intx)) \
+NOT_PRODUCT(option(IGVPrintLevel, "IGVPrintLevel", Intx)) \
 NOT_PRODUCT(option(TraceAutoVectorization, "TraceAutoVectorization", Ccstrlist)) \
 NOT_PRODUCT(option(TraceMergeStores, "TraceMergeStores", Ccstrlist)) \
   option(Vectorize, "Vectorize", Bool) \

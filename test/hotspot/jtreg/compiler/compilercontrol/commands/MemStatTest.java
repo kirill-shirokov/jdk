@@ -41,17 +41,17 @@ public class MemStatTest {
         ProcessTools.executeTestJava("-XX:CompileCommand=MemStat,*.*", "-version")
                 .shouldHaveExitValue(0)
                 .shouldNotContain("CompileCommand: An error occurred during parsing")
-                .shouldContain("CompileCommand: MemStat *.* int MemStat = 1"); // should be registered
+                .shouldContain("CompileCommand: MemStat *.* uintx MemStat = 1"); // should be registered
         // collect explicit
         ProcessTools.executeTestJava("-XX:CompileCommand=MemStat,*.*,collect", "-version")
                 .shouldHaveExitValue(0)
                 .shouldNotContain("CompileCommand: An error occurred during parsing")
-                .shouldContain("CompileCommand: MemStat *.* int MemStat = 1"); // should be registered
+                .shouldContain("CompileCommand: MemStat *.* uintx MemStat = 1"); // should be registered
         // print explicit
         ProcessTools.executeTestJava("-XX:CompileCommand=MemStat,*.*,print", "-version")
                 .shouldHaveExitValue(0)
                 .shouldNotContain("CompileCommand: An error occurred during parsing")
-                .shouldContain("CompileCommand: MemStat *.* int MemStat = 2");
+                .shouldContain("CompileCommand: MemStat *.* uintx MemStat = 2");
         // invalid suboption
         ProcessTools.executeTestJava("-XX:CompileCommand=MemStat,*.*,invalid", "-version")
                 .shouldNotHaveExitValue(0)

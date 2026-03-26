@@ -41,7 +41,7 @@
     cflags(BreakAtCompile,          bool, false, BreakAtCompile) \
     cflags(Log,                     bool, LogCompilation, Unknown) \
     cflags(MemLimit,                intx, 0, MemLimit) \
-    cflags(MemStat,                 int, 0, MemStat) \
+    cflags(MemStat,                 uintx, 0, MemStat) \
     cflags(PrintAssembly,           bool, PrintAssembly, PrintAssembly) \
     cflags(PrintCompilation,        bool, PrintCompilation, PrintCompilation) \
     cflags(PrintInlining,           bool, PrintInlining, PrintInlining) \
@@ -83,8 +83,8 @@ NOT_PRODUCT(cflags(PrintIdeal,          bool, PrintIdeal, PrintIdeal)) \
     cflags(TraceSpilling,           bool, TraceSpilling, TraceSpilling) \
     cflags(Vectorize,               bool, false, Vectorize) \
     cflags(CloneMapDebug,           bool, false, CloneMapDebug) \
-NOT_PRODUCT(cflags(PhasePrintLevel, int, PrintPhaseLevel, PhasePrintLevel)) \
-NOT_PRODUCT(cflags(IGVPrintLevel,   int, PrintIdealGraphLevel, IGVPrintLevel)) \
+NOT_PRODUCT(cflags(PhasePrintLevel, intx, PrintPhaseLevel, PhasePrintLevel)) \
+NOT_PRODUCT(cflags(IGVPrintLevel,   intx, PrintIdealGraphLevel, IGVPrintLevel)) \
     cflags(IncrementalInlineForceCleanup, bool, IncrementalInlineForceCleanup, IncrementalInlineForceCleanup) \
     cflags(MaxNodeLimit,            intx, MaxNodeLimit, MaxNodeLimit)
 #define compilerdirectives_c2_string_flags(cflags) \
@@ -220,7 +220,6 @@ void set_##name(void* value) {                                      \
     return _trace_merge_stores_tags;
   };
 
-  void print_int(outputStream* st, ccstr n, int v, bool mod) { if (mod) { st->print("%s:%d ", n, v); } }
   void print_intx(outputStream* st, ccstr n, intx v, bool mod) { if (mod) { st->print("%s:%zd ", n, v); } }
   void print_uintx(outputStream* st, ccstr n, intx v, bool mod) { if (mod) { st->print("%s:%zu ", n, v); } }
   void print_bool(outputStream* st, ccstr n, bool v, bool mod) { if (mod) { st->print("%s:%s ", n, v ? "true" : "false"); } }
