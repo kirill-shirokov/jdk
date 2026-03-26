@@ -124,6 +124,7 @@ template<> OptionType get_type_for<uint>() {
   return OptionType::Uint;
 }
 
+#ifdef _LP64
 template<> OptionType get_type_for<intx>() {
   return OptionType::Intx;
 }
@@ -131,6 +132,7 @@ template<> OptionType get_type_for<intx>() {
 template<> OptionType get_type_for<uintx>() {
   return OptionType::Uintx;
 }
+#endif
 
 template<> OptionType get_type_for<bool>() {
   return OptionType::Bool;
@@ -179,8 +181,10 @@ class TypedMethodOptionMatcher : public MethodMatcher {
     bool bool_value;
     int int_value;
     uint uint_value;
+#ifdef _LP64
     intx intx_value;
     uintx uintx_value;
+#endif
     double double_value;
     ccstr ccstr_value;
   } _u;
@@ -225,6 +229,7 @@ template<> uint TypedMethodOptionMatcher::value<uint>() {
   return _u.uint_value;
 }
 
+#ifdef _LP64
 template<> intx TypedMethodOptionMatcher::value<intx>() {
   return _u.intx_value;
 }
@@ -232,6 +237,7 @@ template<> intx TypedMethodOptionMatcher::value<intx>() {
 template<> uintx TypedMethodOptionMatcher::value<uintx>() {
   return _u.uintx_value;
 }
+#endif
 
 template<> bool TypedMethodOptionMatcher::value<bool>() {
   return _u.bool_value;
@@ -253,6 +259,7 @@ template<> void TypedMethodOptionMatcher::set_value(uint value) {
   _u.uint_value = value;
 }
 
+#ifdef _LP64
 template<> void TypedMethodOptionMatcher::set_value(intx value) {
   _u.intx_value = value;
 }
@@ -260,6 +267,7 @@ template<> void TypedMethodOptionMatcher::set_value(intx value) {
 template<> void TypedMethodOptionMatcher::set_value(uintx value) {
   _u.uintx_value = value;
 }
+#endif
 
 template<> void TypedMethodOptionMatcher::set_value(double value) {
   _u.double_value = value;
@@ -486,8 +494,10 @@ bool CompilerOracle::has_any_command_set() {
 // Explicit instantiation for all OptionTypes supported.
 template bool CompilerOracle::has_option_value<int>(const methodHandle& method, CompileCommandEnum option, int& value);
 template bool CompilerOracle::has_option_value<uint>(const methodHandle& method, CompileCommandEnum option, uint& value);
+#ifdef _LP64
 template bool CompilerOracle::has_option_value<intx>(const methodHandle& method, CompileCommandEnum option, intx& value);
 template bool CompilerOracle::has_option_value<uintx>(const methodHandle& method, CompileCommandEnum option, uintx& value);
+#endif
 template bool CompilerOracle::has_option_value<bool>(const methodHandle& method, CompileCommandEnum option, bool& value);
 template bool CompilerOracle::has_option_value<ccstr>(const methodHandle& method, CompileCommandEnum option, ccstr& value);
 template bool CompilerOracle::has_option_value<double>(const methodHandle& method, CompileCommandEnum option, double& value);
@@ -501,13 +511,23 @@ bool CompilerOracle::option_matches_type(CompileCommandEnum option, T& value) {
   if (option_type == OptionType::Ccstrlist) {
     option_type = OptionType::Ccstr; // CCstrList type options are stored as Ccstr
   }
+#ifdef _LP64
   return (get_type_for<T>() == option_type);
+#else
+  // On 32 bits both get_type_for<int> and get_type_for<intx> return Int. Same for uint/Uintx.
+  enum OptionType actual_type = get_type_for<T>();
+  return option_type == actual_type
+     || (option_type == OptionType::Intx && actual_type == OptionType::Int)
+     || (option_type == OptionType::Uintx && actual_type == OptionType::Uint);
+#endif
 }
 
 template bool CompilerOracle::option_matches_type<int>(CompileCommandEnum option, int& value);
 template bool CompilerOracle::option_matches_type<uint>(CompileCommandEnum option, uint& value);
+#ifdef _LP64
 template bool CompilerOracle::option_matches_type<intx>(CompileCommandEnum option, intx& value);
 template bool CompilerOracle::option_matches_type<uintx>(CompileCommandEnum option, uintx& value);
+#endif
 template bool CompilerOracle::option_matches_type<bool>(CompileCommandEnum option, bool& value);
 template bool CompilerOracle::option_matches_type<ccstr>(CompileCommandEnum option, ccstr& value);
 template bool CompilerOracle::option_matches_type<double>(CompileCommandEnum option, double& value);
