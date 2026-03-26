@@ -210,7 +210,7 @@ bool DirectiveSet::should_collect_memstat() const {
 }
 
 bool DirectiveSet::should_print_memstat() const {
-  return MemStatOption == static_cast<int>(MemStatAction::print);
+  return MemStatOption == (uintx)MemStatAction::print;
 }
 
 size_t DirectiveSet::mem_limit() const {
