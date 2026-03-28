@@ -240,6 +240,11 @@ tier2_compiler = \
   compiler/stringopts/ \
   -:tier1_compiler
 
+compilecommandlevel = \
+  compiler/compilercontrol/commands/CompileLevelParseTest.java \
+  compiler/compilercontrol/commands/CompileLevelPrintTest.java \
+  compiler/compilercontrol/commands/CompileLevelWBTest.java \
+
 tier3_compiler = \
   :hotspot_compiler \
   -:tier1_compiler \
