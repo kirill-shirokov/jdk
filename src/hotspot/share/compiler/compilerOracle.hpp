@@ -62,7 +62,7 @@ class methodHandle;
   option(Break, "break", Uint) \
   option(BreakAtExecute, "BreakAtExecute", Bool) \
   option(BreakAtCompile, "BreakAtCompile", Bool) \
-  option(MemLimit, "MemLimit", Uintx) \
+  option(MemLimit, "MemLimit", Intx) \
   option(MemStat, "MemStat", Uint) \
   option(PrintAssembly, "PrintAssembly", Bool) \
   option(PrintCompilation, "PrintCompilation", Bool) \

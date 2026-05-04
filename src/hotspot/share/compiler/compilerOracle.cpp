@@ -816,7 +816,7 @@ static void skip_comma(char* &line) {
   }
 }
 
-static bool parseMemLimit(const char* line, uintx& value, int& bytes_read, char* errorbuf, const int buf_size) {
+static bool parseMemLimit(const char* line, intx& value, int& bytes_read, char* errorbuf, const int buf_size) {
   // Format:
   // "<memory size>['~' <suboption>]"
   // <memory size> can have units, e.g. M
@@ -934,30 +934,30 @@ static bool scan_value(enum OptionType type, char* line, int& total_bytes_read,
     }
   } else if (type == OptionType::Intx) {
     intx value;
-    // Is it a raw number?
-    bool success = sscanf(line, "%zd%n", &value, &bytes_read) == 1;
-    if (success) {
-      total_bytes_read += bytes_read;
-      return register_command(matcher, option, errorbuf, buf_size, value);
-    } else {
-      jio_snprintf(errorbuf, buf_size, "Value cannot be read for option '%s' of type '%s'", ccname, type_str);
-      return false;
-    }
-  } else if (type == OptionType::Uintx) {
-    uintx value;
-    bool success = false;
+    bool success;
     if (option == CompileCommandEnum::MemLimit) {
       // Special parsing for MemLimit
       success = parseMemLimit(line, value, bytes_read, parseErrorBuf, sizeof(parseErrorBuf));
     } else {
-      // parse as raw number
-      success = sscanf(line, "%zu%n", &value, &bytes_read) == 1;
+      // Is it a raw number?
+      success = sscanf(line, "%zd%n", &value, &bytes_read) == 1;
     }
     if (success) {
       total_bytes_read += bytes_read;
       return register_command(matcher, option, errorbuf, buf_size, value);
     } else {
       jio_snprintf(errorbuf, buf_size, "Value cannot be read for option '%s' of type '%s'%s", ccname, type_str, parseErrorBuf);
+      return false;
+    }
+  } else if (type == OptionType::Uintx) {
+    uintx value;
+    // parse as raw number
+    bool success = sscanf(line, "%zu%n", &value, &bytes_read) == 1;
+    if (success) {
+      total_bytes_read += bytes_read;
+      return register_command(matcher, option, errorbuf, buf_size, value);
+    } else {
+      jio_snprintf(errorbuf, buf_size, "Value cannot be read for option '%s' of type '%s'", ccname, type_str);
       return false;
     }
   } else if (type == OptionType::Ccstr) {
