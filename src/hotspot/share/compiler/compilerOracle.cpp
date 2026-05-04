@@ -81,7 +81,7 @@ inline bool bitmask_applies_to_comp_level(uint bitmask, int comp_level) {
 }
 
 static bool is_valid_comp_level_bitmask(uint bitmask) {
-  if (bitmask < 0 || bitmask > comp_level_bitmask_all_levels) {
+  if (bitmask > comp_level_bitmask_all_levels) {
     return false;
   }
   for (; bitmask != 0; bitmask /= 10) {
