@@ -865,10 +865,10 @@ static bool parseMemStat(const char* line, uint& value, int& bytes_read, char* e
   }
 
   IF_ENUM_STRING("collect", {
-    value = (uintx)MemStatAction::collect;
+    value = (uint)MemStatAction::collect;
   });
   IF_ENUM_STRING("print", {
-    value = (uintx)MemStatAction::print;
+    value = (uint)MemStatAction::print;
   });
 #undef IF_ENUM_STRING
 
@@ -1263,7 +1263,7 @@ bool CompilerOracle::parse_from_line(char* line) {
           break;
         case CompileCommandEnum::MemStat:
           // MemStat default action is to collect data but to not print
-          if (!register_command(matcher, option, error_buf, sizeof(error_buf), (uintx)MemStatAction::collect)) {
+          if (!register_command(matcher, option, error_buf, sizeof(error_buf), (uint)MemStatAction::collect)) {
             print_parse_error(error_buf, original.get());
             return false;
           }
