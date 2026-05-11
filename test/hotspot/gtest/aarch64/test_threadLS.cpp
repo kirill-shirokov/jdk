@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2016, 2026, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2016 SAP SE. All rights reserved.
+ * Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -20,27 +19,17 @@
  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
  * or visit www.oracle.com if you need additional information or have any
  * questions.
- *
  */
 
-#ifndef CPU_S390_REGISTERMAP_S390_HPP
-#define CPU_S390_REGISTERMAP_S390_HPP
+#if defined(AARCH64) && !defined(ZERO)
 
-// Machine-dependent implementation for register maps.
+#include "runtime/javaThread.hpp"
+#include "unittest.hpp"
 
- friend class frame;
+TEST_VM(ThreadLS, get_thread_helper) {
+  Thread* expected = Thread::current();
+  Thread* actual = JavaThread::aarch64_get_thread_helper();
+  ASSERT_EQ(actual, expected);
+}
 
- private:
-  // This is the hook for finding a register in a "well-known" location,
-  // such as a register block of a predetermined format.
-  // Since there is none, we just return null.
-  address pd_location(VMReg reg) const {return nullptr;}
-
-  address pd_location(VMReg base_reg, int slot_idx) const;
-
-  // No PD state to clear or copy.
-  void pd_clear() {}
-  void pd_initialize() {}
-  void pd_initialize_from(const RegisterMap* map) {}
-
-#endif // CPU_S390_REGISTERMAP_S390_HPP
+#endif  // AARCH64 && !ZERO
