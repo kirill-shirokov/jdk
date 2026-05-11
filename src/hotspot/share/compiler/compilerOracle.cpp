@@ -921,7 +921,6 @@ static bool scan_value(enum OptionType type, char* line, int& total_bytes_read,
         }
         break;
       default:
-        // Is it a raw number?
         success = sscanf(line, "%u%n", &value, &bytes_read) == 1;
     }
     if (success) {
@@ -938,7 +937,6 @@ static bool scan_value(enum OptionType type, char* line, int& total_bytes_read,
       // Special parsing for MemLimit
       success = parseMemLimit(line, value, bytes_read, parse_error_buf, sizeof(parse_error_buf));
     } else {
-      // Is it a raw number?
       success = sscanf(line, "%zd%n", &value, &bytes_read) == 1;
     }
     if (success) {
