@@ -336,10 +336,7 @@ public class WhiteBox {
 
   // Compiler
 
-  // Determines if the libgraal shared library file is present.
-  public native boolean hasLibgraal();
-  public native boolean isC2OrJVMCIIncluded();
-  public native boolean isJVMCISupportedByGC();
+  public native boolean isC2Included();
 
   public native int     matchesMethod(Executable method, String pattern);
   public native int     matchesInline(Executable method, String pattern);
@@ -564,7 +561,6 @@ public class WhiteBox {
   // Don't use these methods directly
   // Use jdk.test.whitebox.gc.GC class instead.
   public native boolean isGCSupported(int name);
-  public native boolean isGCSupportedByJVMCICompiler(int name);
   public native boolean isGCSelected(int name);
   public native boolean isGCSelectedErgonomically();
 
@@ -775,20 +771,23 @@ public class WhiteBox {
     return constant;
   }
   public native Boolean getMethodBooleanOption(Executable method, String name);
+  public native Long    getMethodIntOption(Executable method, String name);
+  public native Long    getMethodUintOption(Executable method, String name);
   public native Long    getMethodIntxOption(Executable method, String name);
   public native Long    getMethodUintxOption(Executable method, String name);
   public native Double  getMethodDoubleOption(Executable method, String name);
   public native String  getMethodStringOption(Executable method, String name);
   private final List<BiFunction<Executable,String,Object>> methodOptionGetters
-      = Arrays.asList(this::getMethodBooleanOption, this::getMethodIntxOption,
-          this::getMethodUintxOption, this::getMethodDoubleOption,
-          this::getMethodStringOption);
+      = Arrays.asList(this::getMethodBooleanOption,
+          this::getMethodIntxOption, this::getMethodUintxOption,
+          this::getMethodIntOption, this::getMethodUintOption,
+          this::getMethodDoubleOption, this::getMethodStringOption);
 
   public Object getMethodOption(Executable method, String name) {
     return methodOptionGetters.stream()
                               .map(f -> f.apply(method, name))
                               .filter(x -> x != null)
-                              .findAny()
+                              .findFirst()
                               .orElse(null);
   }
 
